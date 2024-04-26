@@ -9,6 +9,17 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+//Política de CORS
+builder.Services.AddCors(options => 
+{
+    options.AddPolicy("DefaultPolicy", builder => 
+    {
+        builder.WithOrigins("http://localhost:4200")
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
+
 //configurações do AutoMapper
 builder.Services.AddAutoMapper(typeof(ProfileMap));
 
@@ -22,6 +33,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseAuthorization();
+
+app.UseCors("DefaultPolicy"); //Política de CORS
 
 app.MapControllers();
 
