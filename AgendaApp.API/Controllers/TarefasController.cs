@@ -25,6 +25,8 @@ namespace AgendaApp.API.Controllers
         /// <summary>
         /// Serviço da API para cadastro de tarefas
         /// </summary>
+        /// 
+
         [HttpPost]
         [ProducesResponseType(typeof(CriarTarefaResponseModel), 201)]
         public IActionResult Post(CriarTarefaRequestModel model)
@@ -51,7 +53,7 @@ namespace AgendaApp.API.Controllers
             }
             catch(Exception e)
             {
-                return StatusCode(500, new { e.Message });
+                return StatusCode(500, new { message = "Ocorreu um erro ao processar a solicitação"});
             }
         }
 
@@ -77,6 +79,7 @@ namespace AgendaApp.API.Controllers
                     tarefa.DataHora = model.DataHora;
                     tarefa.Prioridade = (PrioridadeTarefa) model.Prioridade;
                     tarefa.DataHoraUltimaAtualizacao = DateTime.Now;
+                    tarefa.Status = model.Status;
 
                     //atualizar no banco de dados
                     tarefaRepository.Update(tarefa);
@@ -133,21 +136,16 @@ namespace AgendaApp.API.Controllers
             }
         }
 
-        /// <summary>
-        /// Serviço da API para consulta de tarefas
-        /// </summary>
-        [HttpGet("{dataInicio}/{dataFim}")]
+        [HttpGet]
         [ProducesResponseType(typeof(List<ConsultarTarefaResponseModel>), 200)]
-        public IActionResult Get(DateTime dataInicio, DateTime dataFim)
+        public IActionResult Get(DateTime? dataInicio, DateTime? dataFim, string? nome)
         {
             try
             {
-                //consultar as tarefas no banco de dados através das datas
                 var tarefaRepository = new TarefaRepository();
-                var tarefas = tarefaRepository.Get(dataInicio, dataFim);
+                var tarefa = tarefaRepository.Get(dataInicio, dataFim, nome);
 
-                //copiar os dados das tarefas para uma lista de ConsultarTarefaResponseModel
-                var response = _mapper.Map<List<ConsultarTarefaResponseModel>>(tarefas);
+                var response = _mapper.Map<List<ConsultarTarefaResponseModel>>(tarefa);
 
                 return StatusCode(200, response);
             }

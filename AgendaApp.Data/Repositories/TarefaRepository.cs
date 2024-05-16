@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AgendaApp.Data.Repositories
 {
@@ -49,18 +50,24 @@ namespace AgendaApp.Data.Repositories
             }
         }
 
-        /// <summary>
-        /// Método para consultar as tarefas por um periodo de datas
-        /// </summary>
-        public List<Tarefa> Get(DateTime dataInicio, DateTime dataFim)
+        public List<Tarefa> Get(DateTime? dataInicio, DateTime? dataFim, string? nome)
         {
             using (var dataContext = new DataContext())
             {
-                return dataContext
-                    .Set<Tarefa>()
-                    .Where(t => t.DataHora >= dataInicio && t.DataHora <= dataFim)
-                    .OrderByDescending(t => t.DataHora)
-                    .ToList();
+                var query = dataContext.Set<Tarefa>().AsQueryable();
+                if (nome != null)
+                {
+                    query = query.Where(t => t.Nome.Contains(nome)).OrderByDescending(t => t.DataHora);
+                }
+                if (dataInicio != null && dataFim != null)
+                {
+                    query = query.Where(t => t.DataHora >= dataInicio && t.DataHora <= dataFim).OrderByDescending(t => t.DataHora);
+                }
+                else if ((nome == null) && (dataInicio == null || dataFim == null))
+                {
+                    throw new ArgumentException("Ambas as datas de início e fim devem ser preenchidas.");
+                }
+                return query.ToList();
             }
         }
 
